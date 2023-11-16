@@ -6,3 +6,9 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+
+# Project exclude paths
+/project/target/
+/target/
+/target/scala-2.12/classes/
+/target/scala-2.12/test-classes/
