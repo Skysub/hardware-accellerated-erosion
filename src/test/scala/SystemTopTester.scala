@@ -13,7 +13,7 @@ class SystemTopTester(dut: SystemTop) extends PeekPokeTester(dut) {
   //Uncomment one of the following line depending on the image you want to load to the data memory
   //var image = Images.blackImage
   //var image = Images.whiteImage
-  var image = Images.cellsImage
+  var image = Images.borderCellsImage
   //var image = Images.borderCellsImage
   for( address <- 0 to image.length-1){
     poke(dut.io.testerDataMemEnable, 1)
@@ -30,7 +30,7 @@ class SystemTopTester(dut: SystemTop) extends PeekPokeTester(dut) {
   //Start the CPU
   poke(dut.io.start, 1)
   var running = true
-  var maxCycles = 20000
+  var maxCycles = 5000
   var cyclesCounter = maxCycles
   while(running) {
     System.out.print("\rRunning cycle: " + (maxCycles - cyclesCounter))

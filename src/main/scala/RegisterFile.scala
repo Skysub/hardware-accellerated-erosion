@@ -7,12 +7,12 @@ class RegisterFile extends Module {
     val xPosition = Input(UInt(16.W))
 
     //The positional outputs
-    val fowardOne = Output(UInt(32.W))
+    val forwardOne = Output(UInt(32.W))
     val here = Output(UInt(32.W))
     val downward = Output(UInt(32.W))
     val backward = Output(UInt(32.W))
     val upward = Output(UInt(32.W))
-    val fowardTwo = Output(UInt(32.W))
+    val forwardTwo = Output(UInt(32.W))
 
     //Other outputs
     val bankRotation = Output(UInt(4.W))
@@ -30,12 +30,12 @@ class RegisterFile extends Module {
   val bankRotationReg = RegInit((0.U(4.W)))
 
   //Setting default values
-  io.fowardOne := 1.U
+  io.forwardOne := 1.U
   io.here := 1.U
   io.downward := 1.U
   io.backward := 1.U
   io.upward := 1.U
-  io.fowardTwo := 1.U
+  io.forwardTwo := 1.U
 
   //Clamp the bank rotation registers
   when(io.shiftBanks){
@@ -80,34 +80,34 @@ class RegisterFile extends Module {
   }
 
   when(io.xPosition === 18.U) {
-    io.fowardTwo := 1.U
+    io.forwardTwo := 1.U
   }.otherwise {
     switch(bankRotationReg) {
       is(0.U) {
-        io.fowardTwo := registerBankB(io.xPosition + 2.U)
+        io.forwardTwo := registerBankB(io.xPosition + 2.U)
       }
       is(1.U) {
-        io.fowardTwo := registerBankC(io.xPosition + 2.U)
+        io.forwardTwo := registerBankC(io.xPosition + 2.U)
       }
       is(2.U) {
-        io.fowardTwo := registerBankA(io.xPosition + 2.U)
+        io.forwardTwo := registerBankA(io.xPosition + 2.U)
       }
     }
   }
 
   when(io.xPosition === 19.U) {
-    io.fowardOne := 1.U
-    io.fowardTwo := 1.U
+    io.forwardOne := 1.U
+    io.forwardTwo := 1.U
   }.otherwise {
     switch(bankRotationReg) {
       is(0.U) {
-        io.fowardOne := registerBankB(io.xPosition + 1.U)
+        io.forwardOne := registerBankB(io.xPosition + 1.U)
       }
       is(1.U) {
-        io.fowardOne := registerBankC(io.xPosition + 1.U)
+        io.forwardOne := registerBankC(io.xPosition + 1.U)
       }
       is(2.U) {
-        io.fowardOne := registerBankA(io.xPosition + 1.U)
+        io.forwardOne := registerBankA(io.xPosition + 1.U)
       }
     }
   }
@@ -115,7 +115,7 @@ class RegisterFile extends Module {
   //Where to write the newly read number?
   when(io.regWrite) {
     switch(io.writeWhere){
-      is(0.U){ //FowardOne
+      is(0.U){ //forwardOne
         switch(bankRotationReg){
           is(0.U){
             registerBankB(io.xPosition + 1.U) := io.dataIn
@@ -180,7 +180,7 @@ class RegisterFile extends Module {
           }
         }
       }
-      is(5.U) { //FowardTwo
+      is(5.U) { //forwardTwo
         switch(bankRotationReg) {
           is(0.U) {
             registerBankB(io.xPosition + 2.U) := io.dataIn
