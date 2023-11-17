@@ -167,11 +167,6 @@ class Accelerator extends Module {
           }
         } //Edge state done
       }
-
-      when(((yPosReg * 20.U) + xPosReg) === 378.U){
-        mainStateReg := done
-        io.done := true.B
-      } //At the final pixel in possible white space
     }
 
     is(done) {
@@ -262,5 +257,10 @@ class Accelerator extends Module {
         readStateReg := upward
       }
     }
+  }
+
+  when(((yPosReg * 20.U) + xPosReg) === 378.U) { //At the final pixel in possible white space
+    mainStateReg := done
+    io.done := true.B
   }
 }
