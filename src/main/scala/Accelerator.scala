@@ -16,7 +16,7 @@ class Accelerator extends Module {
   //Write here your code
 
   //State enum and register
-  val idle :: setCorner :: outerLoop :: setEdge :: innerLoop :: checkPixel :: checkAdjacent :: done :: Nil = Enum(8)
+  val idle :: setCorner :: outerLoop :: setEdge :: innerLoop :: checkPixel :: checkAdjacent :: setPixel :: done :: Nil = Enum(9)
   val stateReg = RegInit(idle)
 
   //Support registers
@@ -137,10 +137,7 @@ class Accelerator extends Module {
           //Right pixel
           io.address := 400.U + j + l + 1.U
           when(io.dataRead === 0.U) {
-            io.address := 400.U + j + l
-            io.writeEnable := 1.B
-            io.dataWrite := 0.U
-            stateReg := innerLoop
+            stateReg := setPixel
           }.otherwise {
             i := i + 1.U
           }
@@ -149,10 +146,7 @@ class Accelerator extends Module {
           //Left pixel
           io.address := 400.U + j + l - 1.U
           when(io.dataRead === 0.U) {
-            io.address := 400.U + j + l
-            io.writeEnable := 1.B
-            io.dataWrite := 0.U
-            stateReg := innerLoop
+            stateReg := setPixel
           }.otherwise {
             i := i + 1.U
           }
@@ -161,10 +155,7 @@ class Accelerator extends Module {
           //Top pixel
           io.address := 400.U + j + l + 20.U
           when(io.dataRead === 0.U) {
-            io.address := 400.U + j + l
-            io.writeEnable := 1.B
-            io.dataWrite := 0.U
-            stateReg := innerLoop
+            stateReg := setPixel
           }.otherwise {
             i := i + 1.U
           }
@@ -173,10 +164,7 @@ class Accelerator extends Module {
           //Bottom pixel
           io.address := 400.U + j + l - 20.U
           when(io.dataRead === 0.U) {
-            io.address := 400.U + j + l
-            io.writeEnable := 1.B
-            io.dataWrite := 0.U
-            stateReg := innerLoop
+            stateReg := setPixel
           }.otherwise {
             io.address := 400.U + j + l
             io.writeEnable := 1.B
@@ -185,6 +173,12 @@ class Accelerator extends Module {
           }
         }
       }
+    }
+    is(setPixel) {
+      io.address := 400.U + j + l
+      io.writeEnable := 1.B
+      io.dataWrite := 0.U
+      stateReg := innerLoop
     }
     is(done) {
       io.done := 1.B
