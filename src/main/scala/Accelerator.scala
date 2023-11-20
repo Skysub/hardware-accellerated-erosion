@@ -14,7 +14,7 @@ class Accelerator extends Module {
   })
 
   //State enum and register
-  val idle :: setCorner :: outerLoop :: setEdge :: innerLoop :: checkPixel :: checkAdjacent :: setPixel :: done :: Nil = Enum(9)
+  val idle :: setCorner :: outerLoop :: setEdge :: innerLoop :: checkPixel :: checkAdjacent :: setPixelBlack :: setPixelWhite :: done :: Nil = Enum(10)
   val stateReg = RegInit(idle)
 
   //Support registers
@@ -23,9 +23,11 @@ class Accelerator extends Module {
   val l = RegInit(1.U(32.W))
 
   //Default values
-  io.writeEnable := false.B
-  io.address := 0.U(16.W)
   io.done := false.B
+  io.address := 0.U(16.W)
+  io.dataWrite := 0.U(32.W)
+  io.writeEnable := false.B
+
 
   //FSMD switch
   switch(stateReg) {
@@ -118,7 +120,7 @@ class Accelerator extends Module {
     }
     is(checkPixel) {
       io.address := 400.U + j + l
-      when(io.dataRead === 0.U) {
+      when(io.dataRead === 0.U(32.W)) {
         stateReg := innerLoop
       }.otherwise {
         i := 0.U
@@ -130,8 +132,8 @@ class Accelerator extends Module {
         is(0.U) {
           //Right pixel
           io.address := 400.U + j + l + 1.U
-          when(io.dataRead === 0.U) {
-            stateReg := setPixel
+          when(io.dataRead === 0.U(32.W)) {
+            stateReg := setPixelBlack
           }.otherwise {
             i := i + 1.U
           }
@@ -139,8 +141,8 @@ class Accelerator extends Module {
         is(1.U) {
           //Left pixel
           io.address := 400.U + j + l - 1.U
-          when(io.dataRead === 0.U) {
-            stateReg := setPixel
+          when(io.dataRead === 0.U(32.W)) {
+            stateReg := setPixelBlack
           }.otherwise {
             i := i + 1.U
           }
@@ -148,8 +150,8 @@ class Accelerator extends Module {
         is(2.U) {
           //Top pixel
           io.address := 400.U + j + l + 20.U
-          when(io.dataRead === 0.U) {
-            stateReg := setPixel
+          when(io.dataRead === 0.U(32.W)) {
+            stateReg := setPixelBlack
           }.otherwise {
             i := i + 1.U
           }
@@ -157,21 +159,25 @@ class Accelerator extends Module {
         is(3.U) {
           //Bottom pixel
           io.address := 400.U + j + l - 20.U
-          when(io.dataRead === 0.U) {
-            stateReg := setPixel
+          when(io.dataRead === 255.U(32.W)) {
+            stateReg := setPixelBlack
           }.otherwise {
-            io.address := 400.U + j + l
-            io.writeEnable := true.B
-            io.dataWrite := 255.U(32.W)
-            stateReg := innerLoop
+            stateReg := setPixelWhite
           }
         }
       }
     }
-    is(setPixel) {
+    is(setPixelBlack) {
       io.address := 400.U + j + l
       io.writeEnable := true.B
       io.dataWrite := 0.U(32.W)
+      stateReg := innerLoop
+    }
+
+    is(setPixelWhite) {
+      io.address := 400.U + j + l
+      io.writeEnable := true.B
+      io.dataWrite := 255.U(32.W)
       stateReg := innerLoop
     }
 
