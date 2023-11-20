@@ -13,15 +13,11 @@ class Accelerator extends Module {
 
   })
 
-  //Write here your code
-
   //State enum and register
   val idle :: setCorner :: outerLoop :: setEdge :: innerLoop :: checkPixel :: checkAdjacent :: setPixel :: done :: Nil = Enum(9)
   val stateReg = RegInit(idle)
 
   //Support registers
-  val addressReg = RegInit(0.U(16.W))
-  val dataReg = RegInit(0.U(32.W))
   val i = RegInit(0.U(32.W))
   val j = RegInit(0.U(32.W))
   val l = RegInit(1.U(32.W))
@@ -29,7 +25,6 @@ class Accelerator extends Module {
   //Default values
   io.writeEnable := false.B
   io.address := 0.U(16.W)
-  io.dataWrite := dataReg
   io.done := false.B
 
   //FSMD switch
@@ -37,7 +32,6 @@ class Accelerator extends Module {
     is(idle) {
       when(io.start) {
         stateReg := setCorner
-        addressReg := 0.U(16.W)
       }
     }
 
@@ -45,13 +39,13 @@ class Accelerator extends Module {
 
       switch(i) {
         is(0.U) {
-          io.writeEnable := 1.B
+          io.writeEnable := true.B
           io.address := 400.U
           io.dataWrite := 0.U
           i := i + 1.U
         }
         is(1.U) {
-          io.writeEnable := 1.B
+          io.writeEnable := true.B
           io.address := 419.U
           io.dataWrite := 0.U
           i := i + 1.U
