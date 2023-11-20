@@ -41,25 +41,25 @@ class Accelerator extends Module {
         is(0.U) {
           io.writeEnable := true.B
           io.address := 400.U
-          io.dataWrite := 0.U
+          io.dataWrite := 0.U(32.W)
           i := i + 1.U
         }
         is(1.U) {
           io.writeEnable := true.B
           io.address := 419.U
-          io.dataWrite := 0.U
+          io.dataWrite := 0.U(32.W)
           i := i + 1.U
         }
         is(2.U) {
-          io.writeEnable := 1.B
+          io.writeEnable := true.B
           io.address := 780.U
-          io.dataWrite := 0.U
+          io.dataWrite := 0.U(32.W)
           i := i + 1.U
         }
         is(3.U) {
-          io.writeEnable := 1.B
+          io.writeEnable := true.B
           io.address := 799.U
-          io.dataWrite := 0.U
+          io.dataWrite := 0.U(32.W)
           stateReg := outerLoop
         }
       }
@@ -79,30 +79,30 @@ class Accelerator extends Module {
       switch(i) {
         is(0.U) {
           //Bottom edge
-          io.writeEnable := 1.B
+          io.writeEnable := true.B
           io.address := 400.U + i + 20.U * 19.U
-          io.dataWrite := 0.U
+          io.dataWrite := 0.U(32.W)
           i := i + 1.U
         }
         is(1.U) {
           //Top edge
-          io.writeEnable := 1.B
+          io.writeEnable := true.B
           io.address := 400.U + i
-          io.dataWrite := 0.U
+          io.dataWrite := 0.U(32.W)
           i := i + 1.U
         }
         is(2.U) {
           //Left edge
-          io.writeEnable := 1.B
+          io.writeEnable := true.B
           io.address := 400.U + i * 20.U
-          io.dataWrite := 0.U
+          io.dataWrite := 0.U(32.W)
           i := i + 1.U
         }
         is(3.U) {
           //Right edge
-          io.writeEnable := 1.B
+          io.writeEnable := true.B
           io.address := 400.U + i * 20.U + 19.U
-          io.dataWrite := 0.U
+          io.dataWrite := 0.U(32.W)
           stateReg := innerLoop
           l := 1.U
         }
@@ -161,8 +161,8 @@ class Accelerator extends Module {
             stateReg := setPixel
           }.otherwise {
             io.address := 400.U + j + l
-            io.writeEnable := 1.B
-            io.dataWrite := 255.U
+            io.writeEnable := true.B
+            io.dataWrite := 255.U(32.W)
             stateReg := innerLoop
           }
         }
@@ -170,12 +170,13 @@ class Accelerator extends Module {
     }
     is(setPixel) {
       io.address := 400.U + j + l
-      io.writeEnable := 1.B
-      io.dataWrite := 0.U
+      io.writeEnable := true.B
+      io.dataWrite := 0.U(32.W)
       stateReg := innerLoop
     }
+
     is(done) {
-      io.done := 1.B
+      io.done := true.B
     }
   }
 }
