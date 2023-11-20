@@ -13,8 +13,10 @@ class Accelerator extends Module {
 
   })
 
+  //Write here your code
+
   //State enum and register
-  val idle :: setCorner :: outerLoop :: setEdge :: innerLoop :: checkPixel :: checkAdjacent :: done :: Nil = Enum(7)
+  val idle :: setCorner :: outerLoop :: setEdge :: innerLoop :: checkPixel :: checkAdjacent :: done :: Nil = Enum(8)
   val stateReg = RegInit(idle)
 
   //Support registers
@@ -188,5 +190,4 @@ class Accelerator extends Module {
       io.done := 1.B
     }
   }
-
 }
