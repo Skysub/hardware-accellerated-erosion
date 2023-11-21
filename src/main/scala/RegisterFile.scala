@@ -3,15 +3,15 @@ import chisel3.util._
 
 class RegisterFile extends Module {
   val io = IO(new Bundle {
-    val dataIn = Input(UInt(32.W)) //Data from memory
+    val dataIn = Input(UInt(8.W)) //Data from memory
     val xPosition = Input(UInt(16.W)) //The x-posiotion we're currently at/examining
 
     //The positional outputs
-    val forwardOne = Output(UInt(32.W))
-    val here = Output(UInt(32.W))
-    val downward = Output(UInt(32.W))
-    val backward = Output(UInt(32.W))
-    val upward = Output(UInt(32.W))
+    val forwardOne = Output(UInt(8.W))
+    val here = Output(UInt(8.W))
+    val downward = Output(UInt(8.W))
+    val backward = Output(UInt(8.W))
+    val upward = Output(UInt(8.W))
 
     //Control
     val regWrite = Input(Bool()) //Write to a register?
@@ -20,9 +20,9 @@ class RegisterFile extends Module {
   })
 
   //Initialize registers
-  val registerBankA =  RegInit(VecInit(Seq.fill(20)(1.U(32.W))))
-  val registerBankB =  RegInit(VecInit(Seq.fill(20)(1.U(32.W))))
-  val registerBankC =  RegInit(VecInit(Seq.fill(20)(1.U(32.W))))
+  val registerBankA =  RegInit(VecInit(Seq.fill(20)(1.U(8.W))))
+  val registerBankB =  RegInit(VecInit(Seq.fill(20)(1.U(8.W))))
+  val registerBankC =  RegInit(VecInit(Seq.fill(20)(1.U(8.W))))
   val bankRotationReg = RegInit((0.U(4.W)))
 
   //Setting default values

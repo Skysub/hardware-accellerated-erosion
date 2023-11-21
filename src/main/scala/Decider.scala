@@ -6,11 +6,11 @@ class Decider extends Module {
   val io = IO(new Bundle {
 
     //Directional pixel information
-    val forward = Input(UInt(32.W))
-    val here = Input(UInt(32.W))
-    val downward = Input(UInt(32.W))
-    val backward = Input(UInt(32.W))
-    val upward = Input(UInt(32.W))
+    val forward = Input(UInt(8.W))
+    val here = Input(UInt(8.W))
+    val downward = Input(UInt(8.W))
+    val backward = Input(UInt(8.W))
+    val upward = Input(UInt(8.W))
 
     //The y position we're currently at
     val yPos = Input(UInt(16.W))

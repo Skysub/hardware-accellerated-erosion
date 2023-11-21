@@ -38,7 +38,7 @@ class Accelerator extends Module {
   io.writeEnable := false.B
   io.address := 0.U(16.W)
   io.done := false.B
-  io.dataWrite := 1337.U(32.W)
+  io.dataWrite := 1.U(32.W)
 
   registerFile.io.xPosition := xPosReg
   registerFile.io.shiftBanks := false.B
