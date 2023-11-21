@@ -4,17 +4,22 @@ import chisel3.experimental.ChiselEnum
 
 class Decider extends Module {
   val io = IO(new Bundle {
+
+    //Directional pixel information
     val forward = Input(UInt(32.W))
     val here = Input(UInt(32.W))
     val downward = Input(UInt(32.W))
     val backward = Input(UInt(32.W))
     val upward = Input(UInt(32.W))
+
+    //The y position we're currently at
     val yPos = Input(UInt(16.W))
 
+    //What the decider has decided
     val nextState = Output(UInt(4.W))
   })
 
-  //Default value
+  //Default value, when no pixels are black and no pixels have the unknown value (1)
   io.nextState := 0.U //Write white here
 
   //The decider
@@ -45,6 +50,8 @@ class Decider extends Module {
   when(io.downward === 0.U) {
     io.nextState := 3.U //Write here black
   }
+
+  //Write foward one and two are disabled on the final row so that we don't miss the final pixel
   when(io.here === 0.U) {
     when(io.yPos === 18.U){
       io.nextState := 3.U //Write here black

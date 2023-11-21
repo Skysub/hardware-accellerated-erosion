@@ -3,8 +3,8 @@ import chisel3.util._
 
 class RegisterFile extends Module {
   val io = IO(new Bundle {
-    val dataIn = Input(UInt(32.W))
-    val xPosition = Input(UInt(16.W))
+    val dataIn = Input(UInt(32.W)) //Data from memory
+    val xPosition = Input(UInt(16.W)) //The x-posiotion we're currently at/examining
 
     //The positional outputs
     val forwardOne = Output(UInt(32.W))
@@ -12,13 +12,9 @@ class RegisterFile extends Module {
     val downward = Output(UInt(32.W))
     val backward = Output(UInt(32.W))
     val upward = Output(UInt(32.W))
-    val forwardTwo = Output(UInt(32.W))
-
-    //Other outputs
-    val bankRotation = Output(UInt(4.W))
 
     //Control
-    val regWrite = Input(Bool())
+    val regWrite = Input(Bool()) //Write to a register?
     val writeWhere = Input(UInt(4.W)) //What position should we write the value to in the order defined above
     val shiftBanks = Input(Bool()) //Rotates the register banks and clears the last
   })
@@ -35,16 +31,13 @@ class RegisterFile extends Module {
   io.downward := 1.U
   io.backward := 1.U
   io.upward := 1.U
-  io.forwardTwo := 1.U
 
-  //Clamp the bank rotation registers
+  //Clamp the bank rotation register value
   when(io.shiftBanks){
     bankRotationReg := Mux(bankRotationReg === 2.U, 0.U, bankRotationReg + 1.U)
   }
 
-  //Setting the outputs
-  io.bankRotation := bankRotationReg
-
+  //Sets the positional outputs to the correct register while accounting for the x-pos and bankRotation
   switch(bankRotationReg){
     is(0.U){
       io.upward := registerBankA(io.xPosition)
@@ -63,6 +56,7 @@ class RegisterFile extends Module {
     }
   }
 
+  //Same as above, except it doesn't output an  actual value when we're too early in the row
   when(io.xPosition === 0.U){
     io.backward := 1.U
   } .otherwise {
@@ -79,25 +73,8 @@ class RegisterFile extends Module {
     }
   }
 
-  when(io.xPosition === 18.U) {
-    io.forwardTwo := 1.U
-  }.otherwise {
-    switch(bankRotationReg) {
-      is(0.U) {
-        io.forwardTwo := registerBankB(io.xPosition + 2.U)
-      }
-      is(1.U) {
-        io.forwardTwo := registerBankC(io.xPosition + 2.U)
-      }
-      is(2.U) {
-        io.forwardTwo := registerBankA(io.xPosition + 2.U)
-      }
-    }
-  }
-
   when(io.xPosition === 19.U) {
     io.forwardOne := 1.U
-    io.forwardTwo := 1.U
   }.otherwise {
     switch(bankRotationReg) {
       is(0.U) {

@@ -24,15 +24,15 @@ class Accelerator extends Module {
   val edgeStateReg = RegInit(edgeTop)
 
   //Modules
-  val registerFile = Module(new RegisterFile())
-  val decider = Module(new Decider())
+  val registerFile = Module(new RegisterFile()) //To help with quick caching of values
+  val decider = Module(new Decider()) //To help decide the next state
 
   //Registers
-  val edgeReg = RegInit(400.U(16.W))
-  val xPosReg = RegInit(1.U(16.W))
-  val yPosReg = RegInit(1.U(16.W))
-  val forwardReg = RegInit(0.U(4.W))
-  val edgeGoingOn = RegInit(1.U(1.W))
+  val edgeReg = RegInit(400.U(16.W)) //Used to hold the address we're at when doing the edge
+  val xPosReg = RegInit(1.U(16.W)) //Our current location's x position
+  val yPosReg = RegInit(1.U(16.W)) //Our current location's y position
+  val forwardReg = RegInit(0.U(4.W)) //Counts the number of cycles left before the write forward one/two states are done
+  val edgeGoingOn = RegInit(1.U(1.W)) //Disables certain logic when the edge is being worked on
 
   //Default values
   io.writeEnable := false.B
@@ -57,7 +57,7 @@ class Accelerator extends Module {
   switch(mainStateReg) {
     is(idle) {
       when(io.start) {
-        mainStateReg := write
+        mainStateReg := write //We start by doing the edge
         writeStateReg := edge
         edgeReg := 400.U(16.W)
         edgeGoingOn := 1.U
@@ -69,33 +69,28 @@ class Accelerator extends Module {
       registerFile.io.dataIn := io.dataRead
       switch(readStateReg){
         is(forward){
-          io.address := ((yPosReg) * 20.U) + xPosReg + 1.U
-          registerFile.io.writeWhere := 0.U
-
-          decider.io.forward := io.dataRead
+          io.address := ((yPosReg) * 20.U) + xPosReg + 1.U //Calculates where in memory 'forward' is
+          registerFile.io.writeWhere := 0.U //Tells the registerfile what position we're writing to
+          decider.io.forward := io.dataRead //Plugs the new value directly into the decider instead of waiting for the register to update
         }
         is(here){
           io.address := ((yPosReg) * 20.U) + xPosReg
           registerFile.io.writeWhere := 1.U
-
           decider.io.here := io.dataRead
         }
         is(downward){
           io.address := ((yPosReg + 1.U) * 20.U) + xPosReg
           registerFile.io.writeWhere := 2.U
-
           decider.io.downward := io.dataRead
         }
         is(backward){
           io.address := ((yPosReg) * 20.U) + xPosReg - 1.U
           registerFile.io.writeWhere := 3.U
-
           decider.io.backward := io.dataRead
         }
         is(upward){
           io.address := ((yPosReg - 1.U) * 20.U) + xPosReg
           registerFile.io.writeWhere := 4.U
-
           decider.io.upward := io.dataRead
         }
       }
@@ -103,8 +98,10 @@ class Accelerator extends Module {
 
     is(write) {
       io.writeEnable := true.B
-      io.dataWrite := 0.U
+      io.dataWrite := 0.U //By default we write black pixels
 
+      //When writing, we're currently ahead of where we've determined a value should be written
+      //This when statement corrects for row changes so we correctly write to the location 'behind' us
       when(xPosReg === 1.U) {
         io.address := ((yPosReg - 1.U) * 20.U) + 18.U + 400.U - forwardReg
       }.otherwise {
@@ -116,8 +113,9 @@ class Accelerator extends Module {
           io.dataWrite := 255.U
         }
         is(writeBlackHere){
-
+          //No additional behavior needed
         }
+        //When writing forward whe need to decrement the forwardReg each cycle
         is(forwardOne) {
           forwardReg := Mux(forwardReg === 0.U, 0.U, forwardReg - 1.U)
         }
@@ -126,6 +124,7 @@ class Accelerator extends Module {
         }
 
         //The edge states
+        //The substates determine by how much the address is incremented and how/when we change to a different edge state
         is(edge) {
           io.address := edgeReg
           io.dataWrite := 0.U(32.W)
@@ -163,15 +162,9 @@ class Accelerator extends Module {
             mainStateReg := read
             readStateReg := forward
             edgeGoingOn := 0.U
-            //mainStateReg := done //FINISH AFTER EDGE HAS BEEN WRITTEN (DEBUG)
           }
         } //Edge state done
       }
-    }
-
-    is(done) {
-      io.done := true.B
-      mainStateReg := done
     }
   }
 
