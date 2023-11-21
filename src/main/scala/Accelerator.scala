@@ -20,7 +20,7 @@ class Accelerator extends Module {
   //Support registers
   val i = RegInit(0.U(32.W))
   val j = RegInit(0.U(32.W))
-  val l = RegInit(1.U(32.W))
+  val l = RegInit(0.U(32.W))
 
   //Default values
   io.done := false.B
@@ -106,12 +106,12 @@ class Accelerator extends Module {
           io.address := 419.U + j * 20.U
           io.dataWrite := 0.U(32.W)
           stateReg := innerLoop
-          l := 1.U
+          l := 0.U
         }
       }
     }
     is(innerLoop) {
-      l := l * 20.U
+      l := l + 20.U
       when(l === 360.U) {
         stateReg := outerLoop
       }.otherwise {
@@ -131,7 +131,7 @@ class Accelerator extends Module {
       switch(i) {
         is(0.U) {
           //Right pixel
-          io.address := 400.U + j + l + 1.U
+          io.address := j + l + 1.U
           when(io.dataRead === 0.U(32.W)) {
             stateReg := setPixelBlack
           }.otherwise {
@@ -140,7 +140,7 @@ class Accelerator extends Module {
         }
         is(1.U) {
           //Left pixel
-          io.address := 400.U + j + l - 1.U
+          io.address := j + l - 1.U
           when(io.dataRead === 0.U(32.W)) {
             stateReg := setPixelBlack
           }.otherwise {
@@ -149,7 +149,7 @@ class Accelerator extends Module {
         }
         is(2.U) {
           //Top pixel
-          io.address := 400.U + j + l + 20.U
+          io.address := j + l + 20.U
           when(io.dataRead === 0.U(32.W)) {
             stateReg := setPixelBlack
           }.otherwise {
@@ -158,19 +158,20 @@ class Accelerator extends Module {
         }
         is(3.U) {
           //Bottom pixel
-          io.address := 400.U + j + l - 20.U
-          when(io.dataRead === 255.U(32.W)) {
+          io.address := j + l - 20.U
+          when(io.dataRead === 0.U(32.W)) {
             stateReg := setPixelBlack
           }.otherwise {
             stateReg := setPixelWhite
           }
         }
       }
+
     }
     is(setPixelBlack) {
       io.address := 400.U + j + l
       io.writeEnable := true.B
-      io.dataWrite := 255.U(32.W)
+      io.dataWrite := 0.U(32.W)
       stateReg := innerLoop
     }
 
