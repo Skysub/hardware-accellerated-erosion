@@ -30,7 +30,7 @@ class SystemTopTester(dut: SystemTop) extends PeekPokeTester(dut) {
   //Start the CPU
   poke(dut.io.start, 1)
   var running = true
-  var maxCycles = 20000
+  var maxCycles = 5000
   var cyclesCounter = maxCycles
   while(running) {
     System.out.print("\rRunning cycle: " + (maxCycles - cyclesCounter))

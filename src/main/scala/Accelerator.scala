@@ -14,7 +14,7 @@ class Accelerator extends Module {
   })
 
   //State enum and register
-  val idle :: setCorner :: outerLoop :: setEdge :: innerLoop :: checkPixel :: checkAdjacent :: setPixelBlack :: setPixelWhite :: done :: Nil = Enum(10)
+  val innerLoop :: checkPixel :: idle :: setCorner :: outerLoop :: setEdge ::  checkAdjacent :: setPixelBlack :: setPixelWhite :: done :: Nil = Enum(10)
   val stateReg = RegInit(idle)
 
   //Support registers
@@ -69,7 +69,7 @@ class Accelerator extends Module {
 
     is(outerLoop) {
       j := j + 1.U
-      when(19.U === j) {
+      when(j === 18.U) {
         stateReg := done
       }.otherwise {
         i := 0.U
@@ -82,28 +82,28 @@ class Accelerator extends Module {
         is(0.U) {
           //Bottom edge
           io.writeEnable := true.B
-          io.address := 400.U + i + 20.U * 19.U
+          io.address := 780.U + j
           io.dataWrite := 0.U(32.W)
           i := i + 1.U
         }
         is(1.U) {
           //Top edge
           io.writeEnable := true.B
-          io.address := 400.U + i
+          io.address := 400.U + j
           io.dataWrite := 0.U(32.W)
           i := i + 1.U
         }
         is(2.U) {
           //Left edge
           io.writeEnable := true.B
-          io.address := 400.U + i * 20.U
+          io.address := 400.U + j * 20.U
           io.dataWrite := 0.U(32.W)
           i := i + 1.U
         }
         is(3.U) {
           //Right edge
           io.writeEnable := true.B
-          io.address := 400.U + i * 20.U + 19.U
+          io.address := 419.U + j * 20.U
           io.dataWrite := 0.U(32.W)
           stateReg := innerLoop
           l := 1.U
@@ -111,7 +111,7 @@ class Accelerator extends Module {
       }
     }
     is(innerLoop) {
-      l := l * 8.U
+      l := l * 20.U
       when(l === 360.U) {
         stateReg := outerLoop
       }.otherwise {
@@ -119,7 +119,7 @@ class Accelerator extends Module {
       }
     }
     is(checkPixel) {
-      io.address := 400.U + j + l
+      io.address := j + l
       when(io.dataRead === 0.U(32.W)) {
         stateReg := innerLoop
       }.otherwise {
@@ -170,7 +170,7 @@ class Accelerator extends Module {
     is(setPixelBlack) {
       io.address := 400.U + j + l
       io.writeEnable := true.B
-      io.dataWrite := 0.U(32.W)
+      io.dataWrite := 255.U(32.W)
       stateReg := innerLoop
     }
 
