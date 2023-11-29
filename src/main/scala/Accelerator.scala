@@ -251,8 +251,7 @@ class Accelerator extends Module {
       }
     }
   }
-
-  when(((yPosReg * 20.U) + xPosReg) === 378.U) { //At the final pixel in possible white space
+  when(((yPosReg * 20.U) + xPosReg) > 381.U || (((yPosReg * 20.U) + xPosReg) > 379.U && mainStateReg === read)) { //When writing after the last possible write
     mainStateReg := done
     io.done := true.B
   }
